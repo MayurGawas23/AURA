@@ -1,0 +1,73 @@
+# ==============================
+# Core AI Framework
+# ==============================
+langchain
+langchain-core
+langchain-community
+langchain-mistralai
+langgraph
+
+# ==============================
+# LLM Providers
+# ==============================
+mistralai
+
+
+
+# ==============================
+# Search Tools
+# ==============================
+tavily-python
+
+# ==============================
+# Web Scraping
+# ==============================
+beautifulsoup4
+lxml
+requests
+httpx
+
+# ==============================
+# Environment Variables
+# ==============================
+python-dotenv
+
+# ==============================
+# Backend
+# ==============================
+fastapi
+uvicorn
+
+# ==============================
+# Data Validation
+# ==============================
+pydantic
+pydantic-settings
+
+# ==============================
+# Tokenizer
+# ==============================
+tiktoken
+
+# ==============================
+# Utilities
+# ==============================
+typing-extensions
+orjson
+tenacity
+
+# ==============================
+# Logging
+# ==============================
+rich
+
+# ==============================
+# Async
+# ==============================
+aiohttp
+
+# ==============================
+# Optional Notebook
+# ==============================
+jupyter
+ipykernel

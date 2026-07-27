@@ -1,0 +1,36 @@
+# Python byte-code & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables & Secret Credentials (CRITICAL - NEVER COMMIT)
+.env
+.env.local
+*.env
+
+# Local ChromaDB Vector Database & Storage Uploads
+chroma_db/
+uploads/
+storage/uploads/
+storage/db.json
+
+# Node & Frontend Dependencies / Builds
+aura-ui/node_modules/
+aura-ui/dist/
+aura-ui/build/
+.npm
+*.log
+
+# IDEs & OS Files
+.vscode/
+.idea/
+*.swp
+*.DS_Store
+Thumbs.db
