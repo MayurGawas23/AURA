@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = rawApiUrl.replace(/\/$/, '');
 
 // Helper to extract clean file name from full path
 const getFileName = (pathStr) => {
@@ -13,8 +14,8 @@ const getFileName = (pathStr) => {
 
 // Markdown Content Sanitizer (Fixes single-line table formatting into clean multi-line tables)
 const formatMarkdownContent = (rawText) => {
-  if (!rawText) return '';
-  let formatted = rawText;
+  if (!rawText) return '*(No content returned from server)*';
+  let formatted = String(rawText);
   
   // Replace single-line markdown pipe table joins "| |" with "|\n|"
   formatted = formatted.replace(/\|\s*\|/g, '|\n|');
@@ -62,6 +63,7 @@ const CodeBlock = ({ children }) => {
 
 // Dual-Engine Interactive Visual Chart & Graph Renderer
 const DataChartRenderer = ({ text }) => {
+  if (!text) return null;
   let chartData = null;
 
   try {
@@ -326,11 +328,13 @@ export default function App() {
       });
       const data = await res.json();
 
+      const responseContent = data.output || data.detail || (typeof data === 'string' ? data : JSON.stringify(data));
+
       const assistantMsg = {
         id: `assistant_${Date.now()}`,
         role: 'assistant',
-        content: data.output,
-        agent_type: data.agent_type,
+        content: responseContent,
+        agent_type: data.agent_type || 'chat',
         execution_plan: data.execution_plan,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -345,7 +349,7 @@ export default function App() {
         {
           id: `error_${Date.now()}`,
           role: 'assistant',
-          content: `Error connecting to backend: ${err.message}. Make sure 'python main.py server' is running on http://localhost:8000`,
+          content: `Error connecting to backend API (${API_BASE_URL}): ${err.message}. Please check backend logs.`,
           agent_type: 'error',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
@@ -511,11 +515,11 @@ export default function App() {
               </div>
               <div className="text-slate-600">|</div>
               <div className="text-slate-300">
-                Uploaded: <strong className="text-cyan-400">{systemStatus.total_files_uploaded} Files</strong>
+                Uploaded: <strong className="text-cyan-400">{systemStatus.total_files_uploaded ?? 0} Files</strong>
               </div>
               <div className="text-slate-600">|</div>
               <div className="text-slate-300">
-                Sessions: <strong className="text-indigo-400">{systemStatus.total_chat_sessions} Saved</strong>
+                Sessions: <strong className="text-indigo-400">{systemStatus.total_chat_sessions ?? 0} Saved</strong>
               </div>
             </div>
           )}
