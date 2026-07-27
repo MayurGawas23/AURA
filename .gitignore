@@ -21,6 +21,9 @@ uploads/
 storage/uploads/
 storage/db.json
 
+# Local RAG Scratch / Document Loaders Folder
+rag/
+
 # Node & Frontend Dependencies / Builds
 aura-ui/node_modules/
 aura-ui/dist/
