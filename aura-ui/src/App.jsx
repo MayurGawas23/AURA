@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // Helper to extract clean file name from full path
 const getFileName = (pathStr) => {
