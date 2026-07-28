@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User } from 'lucide-react';
+import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User, AlertTriangle } from 'lucide-react';
 
 const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const API_BASE_URL = rawApiUrl.replace(/\/$/, '');
@@ -283,6 +283,22 @@ export default function App() {
   const executeQuery = async (queryText, mode = activeTab, path = filePath) => {
     if (!queryText.trim()) return;
 
+    // Mandatory Document Upload Validation for Document Modes on New Sessions
+    const requiresFile = ['rag', 'data', 'vision'].includes(mode);
+    let hasExistingSessionFile = false;
+    if (activeSessionId) {
+      const currentSess = sessionsList.find((s) => s.session_id === activeSessionId);
+      if (currentSess && Array.isArray(currentSess.uploaded_files) && currentSess.uploaded_files.length > 0) {
+        hasExistingSessionFile = true;
+      }
+    }
+
+    if (requiresFile && !path && !hasExistingSessionFile) {
+      const fileTypeName = mode === 'rag' ? 'Document (PDF, TXT, DOCX)' : mode === 'data' ? 'Dataset (CSV, XLSX)' : 'Image / Circuit Schematic';
+      alert(`⚠️ Mandatory Attachment Required:\n\nYou must attach a ${fileTypeName} to start a session in [${getAgentLabel(mode)}] mode.\n\nOnce attached, subsequent queries in this session will automatically reuse your document.`);
+      return;
+    }
+
     const workingAgent = getAgentLabel(mode);
     const targetSid = activeSessionId || `session_${Date.now()}`;
 
@@ -404,10 +420,10 @@ export default function App() {
   };
 
   const toolCapabilityTiles = [
-    { mode: 'auto', icon: Sparkles, label: 'Auto Router', text: 'Intelligent reasoning agent that automatically selects the best tools for your query.', promptText: 'Analyze this complex workflow and determine the best approach' },
-    { mode: 'research', icon: Search, label: 'Deep Research', text: 'Real-time web search and comparative synthesis on any topic.', promptText: 'Compare Python vs Rust performance, concurrency, and memory management' },
+    { mode: 'auto', icon: Sparkles, label: 'Auto Router', text: 'Intelligent reasoning agent that automatically selects the best tools for your query.', promptText: 'Can you help me with these...' },
+    { mode: 'research', icon: Search, label: 'Deep Research', text: 'Real-time web search and comparative synthesis on any topic.', promptText: 'Tell me about history of Python language' },
     { mode: 'rag', icon: FileText, label: 'RAG Document QA', text: 'Contextual QA over uploaded PDFs, DOCX, and text using ChromaDB vector search.', promptText: 'What are the main findings and contractual terms in the uploaded document?' },
-    { mode: 'code', icon: Code, label: 'Code Engineer', text: 'Production-grade code generation, algorithm design, and unit testing.', promptText: 'Write an asynchronous LRU Cache class in Python with thread safety' },
+    { mode: 'code', icon: Code, label: 'Code Engineer', text: 'Production-grade code generation, algorithm design, and unit testing.', promptText: 'Write a function to check if a string is a palindrome in Python' },
     { mode: 'data', icon: BarChart2, label: 'Data Analysis', text: 'Pandas dataset profiling with descriptive metrics and visual graphs.', promptText: 'Analyze dataset statistical metrics and summarize key distribution metrics' },
     { mode: 'vision', icon: Eye, label: 'Vision & OCR', text: 'Inspect electrical schematics, circuit diagrams (CD), and technical diagrams.', promptText: 'Inspect this technical circuit diagram schematic and identify component nodes' },
   ];
@@ -593,7 +609,8 @@ export default function App() {
                 </div>
                 {['rag', 'data', 'vision'].includes(activeTab) && (
                   <p className="text-[11px] text-amber-400/90 mt-2 flex items-center space-x-1.5 font-medium px-2">
-                    <span>📌 <strong>Attachment Note</strong>: Attach a file for your first prompt in a new session. Subsequent queries in this session will automatically reuse your uploaded document.</span>
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span><strong>Mandatory Attachment</strong>: You must attach a file to start a session in [{getAgentLabel(activeTab)}].</span>
                   </p>
                 )}
               </form>
@@ -803,7 +820,8 @@ export default function App() {
                 </div>
                 {['rag', 'data', 'vision'].includes(activeTab) && (
                   <p className="text-[11px] text-amber-400/90 mt-1.5 flex items-center space-x-1.5 font-medium px-2">
-                    <span>📌 <strong>Attachment Note</strong>: Attach a file for your first prompt in a new session. Subsequent queries in this session automatically reuse your uploaded document.</span>
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span><strong>Mandatory Attachment</strong>: File required to start session. Subsequent queries in this session reuse your file.</span>
                   </p>
                 )}
               </form>

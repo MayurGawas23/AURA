@@ -110,34 +110,51 @@ User Question: {question}""")
 rag_chain = rag_prompt | llm | StrOutputParser()
 
 # =====================================================================
-# 4. HARDCORE CODE ENGINEERING AGENT (Production Code + Complexity Analysis)
+# 4. HARDCORE CODE ENGINEERING AGENT (Ultra-Simple Direct Code)
 # =====================================================================
 
 code_prompt = ChatPromptTemplate.from_messages([
-    ('system', """You are a Staff Software Engineer & Compiler Specialist.
+    ('system', """You are an Elite Software Engineer.
 
-HARDCORE OUTPUT FORMAT CONTRACT:
-You MUST provide your response in the following 3 structured sections:
+HARDCORE DIRECT CODE RULES:
+1. PURE & ULTRA-SIMPLE CODE: Write clean, fundamental, easy-to-understand code inside a ```python ... ``` block. Avoid complex one-liners, advanced list comprehensions, or over-engineered abstractions. Use clear variables and fundamental loops.
+2. ZERO BOILERPLATE: Do NOT add type unions, verbose docstrings, or test frameworks. Provide the direct function followed by 2-3 simple `print()` example calls.
+3. CONCISE HIGHLIGHTS: Provide 2 short bullet points explaining the core algorithm logic.
+4. COMPLEXITY ANALYSIS: Provide exact Time and Space complexity.
 
-1. PRODUCTION CODE IMPLEMENTATION:
-Output clean, fully typed, production-grade Python code inside a ```python ... ``` block.
-- Include explicit type hints (`typing`), docstrings, and comprehensive error handling.
-- Include an executable unit test / usage demonstration block (`if __name__ == '__main__':`).
+Structure your response EXACTLY as follows:
 
-2. TECHNICAL HIGHLIGHTS:
-### ⚙️ Technical Architecture & Key Highlights
-- [Bullet 1 explaining architectural design pattern]
-- [Bullet 2 explaining concurrency, memory, or safety mechanism]
+```python
+def is_palindrome(s):
+    left = 0
+    right = len(s) - 1
 
-3. COMPLEXITY ANALYSIS:
+    while left < right:
+        if s[left] != s[right]:
+            return False
+        left += 1
+        right -= 1
+
+    return True
+
+# Example Usage
+print(is_palindrome("madam"))   # True
+print(is_palindrome("racecar")) # True
+print(is_palindrome("hello"))   # False
+```
+
+### ⚙️ Technical Highlights
+- **Approach**: [Brief 1-sentence explanation of approach/logic]
+- **Simplicity**: [Brief 1-sentence note on readability and memory handling]
+
 ### ⏱ Complexity Analysis
-- **Time Complexity**: $O(...)$ — [Brief justification]
-- **Space Complexity**: $O(...)$ — [Brief justification]"""),
+- **Time Complexity**: $O(N)$ — [Brief 1-line justification]
+- **Space Complexity**: $O(1)$ — [Brief 1-line justification]"""),
     ('placeholder', '{history}'),
     ('human', """Task: {task}
 Context: {code_context}
 
-Provide the production code, technical highlights, and complexity analysis.""")
+Provide ultra-simple, direct Python code with clean examples, highlights, and complexity.""")
 ])
 code_chain = code_prompt | llm | StrOutputParser()
 
@@ -189,7 +206,7 @@ Analyze the dataset statistics. Output JSON chart block first, followed by key n
 data_chain = data_prompt | llm | StrOutputParser()
 
 # =====================================================================
-# 6. HARDCORE TECHNICAL VISION AGENT (Optical Inspection Contract)
+# 6. HARDCORE TECHNICAL VISION AGENT (Direct Answer + Visual Findings)
 # =====================================================================
 
 vision_prompt = ChatPromptTemplate.from_messages([
@@ -197,27 +214,20 @@ vision_prompt = ChatPromptTemplate.from_messages([
 
 HARDCORE EXECUTION DIRECTIVES:
 1. ZERO DISCLAIMER POLICY: NEVER output disclaimers like 'I am a text-based AI' or 'I cannot view images'. Treat the provided Vision Artifact Context as the authoritative optical inspection payload.
-2. Structure your output into 3 clear sections:
+2. DIRECT QUERY MATCHING: Directly and precisely address the user's exact question first. If the user asks for components, list the components directly.
+3. STRUCTURED OUTPUT CONTRACT:
 
-### 🔍 Optical Inspection & Domain Context
-- **Target File**: [Filename]
-- **Resolution & Format**: [Dimensions and color mode]
-- **Detected Domain**: [Circuit Schematic (CD), Official Document Notice, or Technical Diagram]
+### 📌 Direct Answer
+[Direct, concise answer answering the user's exact query]
 
-### 📐 Structural Breakdown & Visual Findings
-- [Key structural component / text finding 1]
-- [Key structural component / text finding 2]
-- [Key structural component / text finding 3]
-
-### 💡 Key Action Items & Technical Takeaways
-- [Actionable takeaway 1]
-- [Actionable takeaway 2]"""),
+### 🔍 Visual Components & Details
+- [Bulleted list of detected components, labels, text OCR, or visual elements]"""),
     ('placeholder', '{history}'),
     ('human', """User Query: {query}
 Vision Artifact Context:
 {image_details}
 
-Provide an elite technical optical inspection breakdown.""")
+Provide a direct answer and visual inspection summary for the user's query.""")
 ])
 vision_chain = vision_prompt | llm | StrOutputParser()
 
