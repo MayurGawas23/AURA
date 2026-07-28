@@ -589,6 +589,7 @@ export default function App() {
                     className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white p-2.5 rounded-xl transition-all shadow-md shadow-indigo-600/30 cursor-pointer shrink-0"
                   >
                     <Send className="w-4 h-4" />
+                  </button>
                 </div>
                 {['rag', 'data', 'vision'].includes(activeTab) && (
                   <p className="text-[11px] text-amber-400/90 mt-2 flex items-center space-x-1.5 font-medium px-2">
