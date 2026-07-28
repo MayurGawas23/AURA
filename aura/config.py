@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     )
 
     # General App Settings
-    APP_NAME: str = "AURA - Autonomous Universal Reasoning Assistant"
+    APP_NAME: str = "AURA - Autonomous Unified Research Assistant"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
     HOST: str = "0.0.0.0"

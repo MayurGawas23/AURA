@@ -1,5 +1,5 @@
 """
-AURA - Autonomous Universal Reasoning Assistant
+AURA - Autonomous Unified Research Assistant
 Main Application Launcher
 """
 

@@ -502,7 +502,7 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400">Autonomous Universal Reasoning Assistant</p>
+              <p className="text-xs text-slate-400">Autonomous Unified Research Assistant</p>
             </div>
           </div>
 
@@ -537,9 +537,6 @@ export default function App() {
                 <h2 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-300 via-cyan-300 to-emerald-300 bg-clip-text text-transparent">
                   What can I help you with today?
                 </h2>
-                <p className="text-sm text-slate-400">
-                  Select an agent capability tile below or type your prompt to begin an autonomous reasoning session.
-                </p>
               </div>
 
               {/* Prompt Input Form with Plus Icon File Attachment */}
@@ -580,7 +577,7 @@ export default function App() {
 
                   <input
                     type="text"
-                    placeholder={uploading ? "Uploading file to storage..." : `Ask AURA in [${getAgentLabel(activeTab)}] mode...`}
+                    placeholder={uploading ? "Uploading file to storage..." : `Ask AURA...`}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="flex-1 bg-transparent px-3 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
@@ -592,8 +589,12 @@ export default function App() {
                     className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white p-2.5 rounded-xl transition-all shadow-md shadow-indigo-600/30 cursor-pointer shrink-0"
                   >
                     <Send className="w-4 h-4" />
-                  </button>
                 </div>
+                {['rag', 'data', 'vision'].includes(activeTab) && (
+                  <p className="text-[11px] text-amber-400/90 mt-2 flex items-center space-x-1.5 font-medium px-2">
+                    <span>📌 <strong>Attachment Note</strong>: Attach a file for your first prompt in a new session. Subsequent queries in this session will automatically reuse your uploaded document.</span>
+                  </p>
+                )}
               </form>
 
               {/* Full 6 Tool Tiles Grid */}
@@ -799,6 +800,11 @@ export default function App() {
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
+                {['rag', 'data', 'vision'].includes(activeTab) && (
+                  <p className="text-[11px] text-amber-400/90 mt-1.5 flex items-center space-x-1.5 font-medium px-2">
+                    <span>📌 <strong>Attachment Note</strong>: Attach a file for your first prompt in a new session. Subsequent queries in this session automatically reuse your uploaded document.</span>
+                  </p>
+                )}
               </form>
             </div>
           )}

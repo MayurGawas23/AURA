@@ -1,6 +1,6 @@
-# ⚡ AURA — Autonomous Universal Reasoning Assistant
+# ⚡ AURA — Autonomous Unified Research Assistant
 
-AURA (**Autonomous Universal Reasoning Assistant**) is a production-grade, multi-agent AI system engineered to execute complex autonomous reasoning tasks across web research, document RAG QA, code generation & execution, tabular data analysis, optical image inspection, and cross-session conversational memory.
+AURA (**Autonomous Unified Research Assistant**) is a production-grade, multi-agent AI system engineered to execute complex autonomous reasoning tasks across web research, document RAG QA, code generation & execution, tabular data analysis, optical image inspection, and cross-session conversational memory.
 
 ---
 

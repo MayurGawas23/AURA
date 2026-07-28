@@ -42,7 +42,7 @@ class ResearchRequest(BaseModel):
 
 class RAGRequest(BaseModel):
     query: str = Field(..., example="What are the key contractual terms in this PDF?")
-    file_path: str = Field(..., example="uploads/contract.pdf")
+    file_path: Optional[str] = Field("", example="uploads/contract.pdf")
     session_id: Optional[str] = None
 
 class CodeRequest(BaseModel):
@@ -52,12 +52,12 @@ class CodeRequest(BaseModel):
 
 class DataRequest(BaseModel):
     query: str = Field(..., example="Calculate total sales by region and list top 3 products")
-    file_path: str = Field(..., example="uploads/sales.csv")
+    file_path: Optional[str] = Field("", example="uploads/sales.csv")
     session_id: Optional[str] = None
 
 class VisionRequest(BaseModel):
     query: str = Field(..., example="Describe the architecture diagram in this image")
-    image_path: str = Field(..., example="uploads/architecture.png")
+    image_path: Optional[str] = Field("", example="uploads/architecture.png")
     session_id: Optional[str] = None
 
 class ChatRequest(BaseModel):
@@ -91,6 +91,24 @@ def get_session_history(session_id: Optional[str]) -> List[Dict[str, Any]]:
     if sess and isinstance(sess.get("chat_history"), list):
         return sess["chat_history"]
     return []
+
+def resolve_session_file(session_id: Optional[str], current_file_path: Optional[str]) -> str:
+    """
+    Session File Inheritance Resolver:
+    If current_file_path is provided, uses it.
+    If missing/empty, automatically inherits the most recently uploaded file in this session so re-uploading is NOT required.
+    """
+    if current_file_path and current_file_path.strip():
+        return current_file_path.strip()
+    
+    if session_id:
+        sess = storage.get_session_by_id(session_id)
+        if sess and isinstance(sess.get("uploaded_files"), list) and len(sess["uploaded_files"]) > 0:
+            valid_files = [f for f in sess["uploaded_files"] if f and str(f).strip()]
+            if valid_files:
+                return valid_files[-1]
+                
+    return ""
 
 # =====================================================================
 # Endpoints
@@ -217,15 +235,31 @@ async def research_agent_endpoint(req: ResearchRequest):
 async def rag_agent_endpoint(req: RAGRequest):
     try:
         sid = req.session_id or f"session_{int(time.time() * 1000)}"
+        target_file = resolve_session_file(sid, req.file_path)
+
+        if not target_file:
+            return AgentResponse(
+                status="success",
+                session_id=sid,
+                agent_type="rag",
+                input_query=req.query,
+                execution_plan={
+                    "agent_name": "RAG Document Agent",
+                    "tools": ["Document File Validator"],
+                    "pipeline_steps": ["Validate Attachment Presence"]
+                },
+                output="⚠️ **Document Attachment Required**: Please attach a document (PDF, TXT, DOCX) using the **`+`** button to query the RAG Document QA Agent in a new session.\n\n*Note: Once uploaded in a session, subsequent queries automatically reuse your uploaded document without re-uploading!*"
+            )
+
         history = get_session_history(sid)
-        res = run_rag_pipeline(req.query, req.file_path, history)
+        res = run_rag_pipeline(req.query, target_file, history)
         storage.save_session_message(
             session_id=sid,
             user_query=req.query,
             agent_type=res["agent_type"],
             execution_plan=res.get("execution_plan"),
             output=res["output"],
-            file_path=req.file_path,
+            file_path=target_file,
             mode="manual"
         )
         res["session_id"] = sid
@@ -256,15 +290,31 @@ async def code_agent_endpoint(req: CodeRequest):
 async def data_agent_endpoint(req: DataRequest):
     try:
         sid = req.session_id or f"session_{int(time.time() * 1000)}"
+        target_file = resolve_session_file(sid, req.file_path)
+
+        if not target_file:
+            return AgentResponse(
+                status="success",
+                session_id=sid,
+                agent_type="data",
+                input_query=req.query,
+                execution_plan={
+                    "agent_name": "Data Analysis Agent",
+                    "tools": ["Dataset File Validator"],
+                    "pipeline_steps": ["Validate Attachment Presence"]
+                },
+                output="⚠️ **Dataset File Required**: Please attach a CSV or Excel dataset file using the **`+`** button to use the Data Analysis Agent in a new session.\n\n*Note: Once uploaded in a session, subsequent queries automatically reuse your dataset without re-uploading!*"
+            )
+
         history = get_session_history(sid)
-        res = run_data_pipeline(req.query, req.file_path, history)
+        res = run_data_pipeline(req.query, target_file, history)
         storage.save_session_message(
             session_id=sid,
             user_query=req.query,
             agent_type=res["agent_type"],
             execution_plan=res.get("execution_plan"),
             output=res["output"],
-            file_path=req.file_path,
+            file_path=target_file,
             mode="manual"
         )
         res["session_id"] = sid
@@ -276,15 +326,31 @@ async def data_agent_endpoint(req: DataRequest):
 async def vision_agent_endpoint(req: VisionRequest):
     try:
         sid = req.session_id or f"session_{int(time.time() * 1000)}"
+        target_file = resolve_session_file(sid, req.image_path)
+
+        if not target_file:
+            return AgentResponse(
+                status="success",
+                session_id=sid,
+                agent_type="vision",
+                input_query=req.query,
+                execution_plan={
+                    "agent_name": "Vision Agent",
+                    "tools": ["Image File Validator"],
+                    "pipeline_steps": ["Validate Attachment Presence"]
+                },
+                output="⚠️ **Image File Required**: Please attach an image or circuit schematic file using the **`+`** button to use the Vision Agent in a new session.\n\n*Note: Once uploaded in a session, subsequent queries automatically reuse your image without re-uploading!*"
+            )
+
         history = get_session_history(sid)
-        res = run_vision_pipeline(req.query, req.image_path, history)
+        res = run_vision_pipeline(req.query, target_file, history)
         storage.save_session_message(
             session_id=sid,
             user_query=req.query,
             agent_type=res["agent_type"],
             execution_plan=res.get("execution_plan"),
             output=res["output"],
-            file_path=req.image_path,
+            file_path=target_file,
             mode="manual"
         )
         res["session_id"] = sid
@@ -296,15 +362,16 @@ async def vision_agent_endpoint(req: VisionRequest):
 async def router_endpoint(req: ChatRequest):
     try:
         sid = req.session_id or f"session_{int(time.time() * 1000)}"
+        target_file = resolve_session_file(sid, req.file_path)
         history = get_session_history(sid)
-        res = run_auto_router_pipeline(req.prompt, req.file_path, history)
+        res = run_auto_router_pipeline(req.prompt, target_file, history)
         storage.save_session_message(
             session_id=sid,
             user_query=req.prompt,
             agent_type=res["agent_type"],
             execution_plan=res.get("execution_plan"),
             output=res["output"],
-            file_path=req.file_path,
+            file_path=target_file,
             mode="auto"
         )
         res["session_id"] = sid
