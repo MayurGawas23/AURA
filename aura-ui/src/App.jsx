@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User, AlertTriangle } from 'lucide-react';
+import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User, AlertTriangle, Menu } from 'lucide-react';
 
 const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const API_BASE_URL = rawApiUrl.replace(/\/$/, '');
@@ -188,10 +188,10 @@ export default function App() {
   // Conversational Chat Messages State
   const [messages, setMessages] = useState([]);
   
-  // Sidebar State
+  // Sidebar State (Default closed on mobile screens < 768px)
   const [sessionsList, setSessionsList] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
   const fileInputRef = useRef(null);
   const chatBottomRef = useRef(null);
@@ -203,6 +203,17 @@ export default function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  // Adjust sidebar state on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchSessions = async () => {
     try {
@@ -387,6 +398,9 @@ export default function App() {
 
   const handleSelectSession = async (sessionItem) => {
     setActiveSessionId(sessionItem.session_id);
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
     try {
       const res = await fetch(`${API_BASE_URL}/api/sessions/${sessionItem.session_id}`);
       const data = await res.json();
@@ -405,6 +419,9 @@ export default function App() {
     setFilePath('');
     setUploadedFileName('');
     setActiveTab('auto');
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   };
 
   const handleResetVectorStore = async () => {
@@ -431,33 +448,44 @@ export default function App() {
   const isLandingPage = messages.length === 0 && !loading;
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-950 text-slate-100 flex font-sans">
-      {/* Fixed Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-80' : 'w-16'} h-full border-r border-slate-800 bg-slate-900/90 backdrop-blur transition-all duration-300 flex flex-col shrink-0`}>
+    <div className="h-screen overflow-hidden bg-slate-950 text-slate-100 flex font-sans relative">
+      {/* Mobile Dark Backdrop Overlay when Sidebar is Open */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 md:hidden"
+        />
+      )}
+
+      {/* Responsive Adaptive Sidebar */}
+      <aside
+        className={`${
+          sidebarOpen ? 'w-80 translate-x-0' : '-translate-x-full md:translate-x-0 md:w-16'
+        } fixed md:relative inset-y-0 left-0 z-50 h-full border-r border-slate-800 bg-slate-900/95 backdrop-blur transition-all duration-300 flex flex-col shrink-0 shadow-2xl md:shadow-none`}
+      >
         <div className="p-4 border-b border-slate-800 flex items-center justify-between shrink-0">
           <button
             onClick={handleNewChat}
             className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors w-full justify-center shadow-md shadow-indigo-600/30 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            {sidebarOpen && <span>New Conversation</span>}
+            {(sidebarOpen || typeof window !== 'undefined' && window.innerWidth < 768) && <span>New Conversation</span>}
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 text-slate-400 hover:text-slate-200 ml-2 cursor-pointer"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-2 cursor-pointer shrink-0"
+            title={sidebarOpen ? "Close Sidebar" : "Open History"}
           >
-            <History className="w-4 h-4" />
+            {sidebarOpen ? <X className="w-4.5 h-4.5" /> : <History className="w-4.5 h-4.5" />}
           </button>
         </div>
 
         {/* Streamlined Sessions Scroll Area */}
         <div className="flex-1 overflow-y-auto p-3 space-y-1.5 min-h-0">
-          {sidebarOpen && (
-            <div className="flex items-center justify-between px-2 py-1 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
-              <span>Saved Sessions</span>
-              <span>{sessionsList.length}</span>
-            </div>
-          )}
+          <div className="flex items-center justify-between px-2 py-1 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+            <span>Saved Sessions</span>
+            <span>{sessionsList.length}</span>
+          </div>
 
           {sessionsList.map((sess) => {
             const badge = getAgentBadgeIcon(sess.agent_used || sess.agent_type);
@@ -475,11 +503,9 @@ export default function App() {
               >
                 <div className="flex items-center space-x-2.5 truncate min-w-0">
                   <span className="text-sm shrink-0">{badge.emoji}</span>
-                  {sidebarOpen && (
-                    <span className={`text-xs font-semibold truncate ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
-                      {sess.title}
-                    </span>
-                  )}
+                  <span className={`text-xs font-semibold truncate ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
+                    {sess.title}
+                  </span>
                 </div>
               </button>
             );
@@ -493,7 +519,7 @@ export default function App() {
             className="w-full flex items-center space-x-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 p-2 rounded-xl text-xs font-medium transition-colors justify-center cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            {sidebarOpen && <span>Clear Vector Store</span>}
+            <span>Clear Vector Store</span>
           </button>
         </div>
       </aside>
@@ -501,14 +527,23 @@ export default function App() {
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Streamlined Header */}
-        <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur px-6 py-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-4">
-            <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30">
-              <Bot className="w-6 h-6 text-white" />
+        <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur px-4 sm:px-6 py-4 flex items-center justify-between shrink-0">
+          <div className="flex items-center space-x-3">
+            {/* Dedicated Mobile Sidebar Menu Toggle Button */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-xl text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="Toggle Sidebar Menu"
+            >
+              <Menu className="w-5 h-5 text-indigo-400" />
+            </button>
+
+            <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30 shrink-0">
+              <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
                   AURA
                 </h1>
                 {systemStatus && (
@@ -518,7 +553,9 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400">Autonomous Unified Research Assistant</p>
+              <p className="text-[11px] sm:text-xs text-slate-400 truncate max-w-[200px] sm:max-w-none">
+                Autonomous Unified Research Assistant
+              </p>
             </div>
           </div>
 
@@ -542,15 +579,15 @@ export default function App() {
         </header>
 
         {/* Workspace */}
-        <main className="flex-1 max-w-5xl w-full mx-auto p-6 flex flex-col min-h-0 overflow-hidden">
+        <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col min-h-0 overflow-hidden">
           {isLandingPage ? (
             /* New Chat Landing Window */
-            <div className="flex-1 flex flex-col items-center justify-center max-w-3xl w-full mx-auto space-y-8 animate-fadeIn">
-              <div className="text-center space-y-3">
-                <div className="inline-flex p-4 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl mb-2 shadow-inner">
-                  <Bot className="w-12 h-12 text-indigo-400" />
+            <div className="flex-1 flex flex-col items-center justify-center max-w-3xl w-full mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
+              <div className="text-center space-y-2 sm:space-y-3">
+                <div className="inline-flex p-3 sm:p-4 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl mb-1 sm:mb-2 shadow-inner">
+                  <Bot className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-400" />
                 </div>
-                <h2 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-300 via-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+                <h2 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-indigo-300 via-cyan-300 to-emerald-300 bg-clip-text text-transparent">
                   What can I help you with today?
                 </h2>
               </div>
@@ -577,7 +614,7 @@ export default function App() {
                   {uploadedFileName && (
                     <div className="flex items-center space-x-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-xl text-emerald-400 font-mono text-xs shrink-0">
                       <Paperclip className="w-3.5 h-3.5" />
-                      <span className="truncate max-w-[120px]">{getFileName(uploadedFileName)}</span>
+                      <span className="truncate max-w-[100px] sm:max-w-[120px]">{getFileName(uploadedFileName)}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -596,7 +633,7 @@ export default function App() {
                     placeholder={uploading ? "Uploading file to storage..." : `Ask AURA...`}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1 bg-transparent px-3 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+                    className="flex-1 bg-transparent px-3 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
                   />
 
                   <button
@@ -616,7 +653,7 @@ export default function App() {
               </form>
 
               {/* Full 6 Tool Tiles Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 w-full">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 w-full">
                 {toolCapabilityTiles.map((tile) => {
                   const TileIcon = tile.icon;
                   const isSelected = activeTab === tile.mode;
@@ -625,7 +662,7 @@ export default function App() {
                     <button
                       key={tile.mode}
                       onClick={() => handleSelectToolTile(tile.mode, tile.promptText)}
-                      className={`p-4 rounded-xl text-left transition-all group flex flex-col justify-between border cursor-pointer ${
+                      className={`p-3 sm:p-4 rounded-xl text-left transition-all group flex flex-col justify-between border cursor-pointer ${
                         isSelected
                           ? 'bg-indigo-600/20 border-indigo-500/60 shadow-lg shadow-indigo-600/20 scale-[1.02]'
                           : 'bg-slate-900/50 hover:bg-slate-800/80 border-slate-800/80 hover:border-indigo-500/40'
@@ -633,13 +670,13 @@ export default function App() {
                     >
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <div className={`flex items-center space-x-2 text-xs font-bold ${isSelected ? 'text-indigo-300' : 'text-indigo-400 group-hover:text-indigo-300'}`}>
-                            <TileIcon className="w-4 h-4" />
-                            <span>{tile.label}</span>
+                          <div className={`flex items-center space-x-1.5 sm:space-x-2 text-xs font-bold ${isSelected ? 'text-indigo-300' : 'text-indigo-400 group-hover:text-indigo-300'}`}>
+                            <TileIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                            <span className="truncate">{tile.label}</span>
                           </div>
-                          <ArrowUpRight className={`w-4 h-4 transition-colors ${isSelected ? 'text-indigo-400' : 'text-slate-600 group-hover:text-indigo-400'}`} />
+                          <ArrowUpRight className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-colors ${isSelected ? 'text-indigo-400' : 'text-slate-600 group-hover:text-indigo-400'}`} />
                         </div>
-                        <p className="text-xs text-slate-400 leading-snug line-clamp-2">{tile.text}</p>
+                        <p className="text-[11px] sm:text-xs text-slate-400 leading-snug line-clamp-2">{tile.text}</p>
                       </div>
                     </button>
                   );
@@ -650,51 +687,51 @@ export default function App() {
             /* Ongoing Session View */
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Scrollable Conversation Stream */}
-              <div className="flex-1 overflow-y-auto space-y-6 pr-3 min-h-0">
+              <div className="flex-1 overflow-y-auto space-y-6 pr-1 sm:pr-3 min-h-0">
                 {messages.map((msg) => (
                   <div key={msg.id} className="space-y-3">
                     {msg.role === 'user' ? (
                       /* Right Side: User Prompt Bubble */
-                      <div className="flex justify-end items-start space-x-3">
-                        <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-5 py-3.5 max-w-2xl shadow-md text-sm leading-relaxed">
+                      <div className="flex justify-end items-start space-x-2.5 sm:space-x-3">
+                        <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-4 sm:px-5 py-3 max-w-[85%] sm:max-w-2xl shadow-md text-xs sm:text-sm leading-relaxed">
                           <p>{msg.content || msg.text}</p>
                           {msg.file_path && (
-                            <div className="mt-2 text-[11px] bg-indigo-700/60 px-2.5 py-1 rounded-lg flex items-center space-x-1.5 font-mono text-indigo-200">
+                            <div className="mt-2 text-[10px] sm:text-[11px] bg-indigo-700/60 px-2.5 py-1 rounded-lg flex items-center space-x-1.5 font-mono text-indigo-200">
                               <Paperclip className="w-3 h-3" />
                               <span className="truncate">{getFileName(msg.file_path)}</span>
                             </div>
                           )}
                         </div>
-                        <div className="p-2 bg-indigo-500/20 border border-indigo-500/30 rounded-xl shrink-0">
-                          <User className="w-5 h-5 text-indigo-400" />
+                        <div className="p-1.5 sm:p-2 bg-indigo-500/20 border border-indigo-500/30 rounded-xl shrink-0">
+                          <User className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
                         </div>
                       </div>
                     ) : (
                       /* Left Side: AI Assistant Response Bubble */
-                      <div className="flex justify-start items-start space-x-3">
-                        <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30 shrink-0">
-                          <Bot className="w-5 h-5 text-white" />
+                      <div className="flex justify-start items-start space-x-2.5 sm:space-x-3">
+                        <div className="p-1.5 sm:p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30 shrink-0">
+                          <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <div className="flex-1 max-w-4xl bg-slate-900/80 border border-slate-800 rounded-2xl rounded-tl-none p-6 space-y-6 shadow-md">
+                        <div className="flex-1 max-w-4xl bg-slate-900/80 border border-slate-800 rounded-2xl rounded-tl-none p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-md min-w-0">
                           {/* Dynamic Execution Plan Banner — Only for tool-executing agents, hidden for casual chat */}
                           {msg.execution_plan && msg.agent_type !== 'chat' && (
-                            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-3 shadow-inner">
+                            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-3 sm:p-4 space-y-3 shadow-inner">
                               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                                 <div className="flex items-center space-x-2 text-xs font-semibold text-indigo-400 uppercase tracking-wider">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                  <span>Execution Plan — {msg.execution_plan.agent_name} Activated</span>
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                  <span className="truncate">Execution Plan — {msg.execution_plan.agent_name}</span>
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                                 <div className="space-y-1">
                                   <span className="text-slate-400 flex items-center space-x-1 font-medium">
-                                    <Wrench className="w-3.5 h-3.5 text-indigo-400" />
+                                    <Wrench className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                                     <span>Tools Activated:</span>
                                   </span>
                                   <div className="flex flex-wrap gap-1.5 pt-1">
                                     {msg.execution_plan.tools.map((t, i) => (
-                                      <span key={i} className="px-2 py-0.5 bg-slate-900 border border-slate-800 rounded text-indigo-300 font-mono">
+                                      <span key={i} className="px-2 py-0.5 bg-slate-900 border border-slate-800 rounded text-indigo-300 font-mono text-[11px]">
                                         • {t}
                                       </span>
                                     ))}
@@ -703,10 +740,10 @@ export default function App() {
 
                                 <div className="space-y-1">
                                   <span className="text-slate-400 flex items-center space-x-1 font-medium">
-                                    <GitCommit className="w-3.5 h-3.5 text-indigo-400" />
+                                    <GitCommit className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                                     <span>Pipeline Flow:</span>
                                   </span>
-                                  <div className="text-slate-300 font-mono pt-1">
+                                  <div className="text-slate-300 font-mono pt-1 text-[11px] overflow-x-auto">
                                     {msg.execution_plan.pipeline_steps.join('  ➔  ')}
                                   </div>
                                 </div>
@@ -718,7 +755,7 @@ export default function App() {
                           <DataChartRenderer text={msg.content} />
 
                           {/* Formatted Markdown Text Body with Table Sanitizer */}
-                          <div className="prose prose-invert max-w-none text-slate-200 text-sm leading-relaxed">
+                          <div className="prose prose-invert max-w-none text-slate-200 text-xs sm:text-sm leading-relaxed overflow-x-auto">
                             <ReactMarkdown
                               components={{
                                 code({ node, inline, className, children, ...props }) {
@@ -726,7 +763,7 @@ export default function App() {
                                   const isInline = inline || (!match && !String(children).includes('\n'));
                                   if (isInline) {
                                     return (
-                                      <code className="bg-slate-950 text-indigo-300 px-1.5 py-0.5 rounded font-mono text-xs border border-slate-800" {...props}>
+                                      <code className="bg-slate-950 text-indigo-300 px-1.5 py-0.5 rounded font-mono text-[11px] border border-slate-800" {...props}>
                                         {children}
                                       </code>
                                     );
@@ -748,10 +785,10 @@ export default function App() {
                 {loading && (
                   <div className="flex justify-start items-start space-x-3 pt-2 animate-fadeIn">
                     <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30 shrink-0">
-                      <Bot className="w-5 h-5 text-white" />
+                      <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div className="bg-slate-900 border border-indigo-500/30 rounded-2xl rounded-tl-none p-4 flex items-center space-x-3">
-                      <Loader2 className="w-5 h-5 animate-spin text-indigo-400 shrink-0" />
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-indigo-400 shrink-0" />
                       <div className="space-y-0.5">
                         <p className="text-xs font-bold text-indigo-300 animate-pulse">
                           {currentWorkingAgent} is reasoning...
@@ -787,7 +824,7 @@ export default function App() {
                   {uploadedFileName && (
                     <div className="flex items-center space-x-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-xl text-emerald-400 font-mono text-xs shrink-0">
                       <Paperclip className="w-3.5 h-3.5" />
-                      <span className="truncate max-w-[120px]">{getFileName(uploadedFileName)}</span>
+                      <span className="truncate max-w-[90px] sm:max-w-[120px]">{getFileName(uploadedFileName)}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -806,16 +843,16 @@ export default function App() {
                     placeholder={uploading ? "Uploading file to storage..." : `Type your prompt for ${getAgentLabel(activeTab)}...`}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1 bg-transparent px-3 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+                    className="flex-1 bg-transparent px-3 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
                   />
 
                   <button
                     type="submit"
                     disabled={loading || !prompt.trim()}
-                    className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-medium text-sm flex items-center space-x-2 transition-all shadow-lg shadow-indigo-600/30 cursor-pointer shrink-0"
+                    className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-4 sm:px-6 py-3 rounded-xl font-medium text-xs sm:text-sm flex items-center space-x-2 transition-all shadow-lg shadow-indigo-600/30 cursor-pointer shrink-0"
                   >
                     <span>Send</span>
-                    <Send className="w-4 h-4" />
+                    <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
                 {['rag', 'data', 'vision'].includes(activeTab) && (
