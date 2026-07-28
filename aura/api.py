@@ -42,22 +42,22 @@ class ResearchRequest(BaseModel):
 
 class RAGRequest(BaseModel):
     query: str = Field(..., example="What are the key contractual terms in this PDF?")
-    file_path: Optional[str] = Field("", example="uploads/contract.pdf")
+    file_path: Optional[str] = ""
     session_id: Optional[str] = None
 
 class CodeRequest(BaseModel):
     task: str = Field(..., example="Write an async LRU cache class in Python")
-    code_snippet: Optional[str] = Field("", example="class LRUCache: pass")
+    code_snippet: Optional[str] = ""
     session_id: Optional[str] = None
 
 class DataRequest(BaseModel):
     query: str = Field(..., example="Calculate total sales by region and list top 3 products")
-    file_path: Optional[str] = Field("", example="uploads/sales.csv")
+    file_path: Optional[str] = ""
     session_id: Optional[str] = None
 
 class VisionRequest(BaseModel):
     query: str = Field(..., example="Describe the architecture diagram in this image")
-    image_path: Optional[str] = Field("", example="uploads/architecture.png")
+    image_path: Optional[str] = ""
     session_id: Optional[str] = None
 
 class ChatRequest(BaseModel):
