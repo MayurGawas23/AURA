@@ -188,10 +188,10 @@ export default function App() {
   // Conversational Chat Messages State
   const [messages, setMessages] = useState([]);
   
-  // Sidebar State (Default open on Desktop >= 768px, closed on mobile)
+  // Sidebar State (Default open on Desktop, closed on Mobile)
   const [sessionsList, setSessionsList] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile toggle state
 
   const fileInputRef = useRef(null);
   const chatBottomRef = useRef(null);
@@ -203,17 +203,6 @@ export default function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
-
-  // Handle mobile screen resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const fetchSessions = async () => {
     try {
@@ -398,9 +387,7 @@ export default function App() {
 
   const handleSelectSession = async (sessionItem) => {
     setActiveSessionId(sessionItem.session_id);
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false);
-    }
+    setSidebarOpen(false); // Close mobile drawer on selection
     try {
       const res = await fetch(`${API_BASE_URL}/api/sessions/${sessionItem.session_id}`);
       const data = await res.json();
@@ -419,9 +406,7 @@ export default function App() {
     setFilePath('');
     setUploadedFileName('');
     setActiveTab('auto');
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false);
-    }
+    setSidebarOpen(false);
   };
 
   const handleResetVectorStore = async () => {
@@ -449,7 +434,7 @@ export default function App() {
 
   return (
     <div className="h-screen overflow-hidden bg-slate-950 text-slate-100 flex font-sans relative">
-      {/* Mobile Dark Backdrop Overlay when Sidebar is Open */}
+      {/* Mobile Dark Backdrop Overlay when Sidebar Drawer is Open */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
@@ -457,38 +442,37 @@ export default function App() {
         />
       )}
 
-      {/* Optimized Desktop & Mobile Adaptive Sidebar */}
+      {/* Sidebar: ALWAYS FULLY OPEN (w-80) on Desktop / Sliding Drawer Overlay on Mobile */}
       <aside
         className={`${
-          sidebarOpen ? 'w-72 sm:w-80 translate-x-0' : '-translate-x-full md:translate-x-0 md:w-16'
-        } fixed md:relative inset-y-0 left-0 z-50 h-full border-r border-slate-800 bg-slate-900/95 backdrop-blur transition-all duration-300 flex flex-col shrink-0 overflow-hidden shadow-2xl md:shadow-none`}
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        } fixed md:relative inset-y-0 left-0 z-50 w-80 h-full border-r border-slate-800 bg-slate-900/95 backdrop-blur transition-transform duration-300 flex flex-col shrink-0 overflow-hidden shadow-2xl md:shadow-none`}
       >
-        <div className="p-3.5 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between shrink-0">
           <button
             onClick={handleNewChat}
-            className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-colors w-full justify-center shadow-md shadow-indigo-600/30 cursor-pointer overflow-hidden"
+            className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors w-full justify-center shadow-md shadow-indigo-600/30 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
-            {sidebarOpen && <span className="truncate">New Conversation</span>}
+            <span>New Conversation</span>
           </button>
 
+          {/* Close button for Mobile Drawer */}
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-1 cursor-pointer shrink-0"
-            title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-2 cursor-pointer shrink-0"
+            title="Close Drawer"
           >
-            {sidebarOpen ? <X className="w-4 h-4" /> : <History className="w-4 h-4" />}
+            <X className="w-4.5 h-4.5" />
           </button>
         </div>
 
-        {/* Streamlined Sessions Scroll Area */}
+        {/* Streamlined Saved Sessions Scroll Area */}
         <div className="flex-1 overflow-y-auto p-3 space-y-1.5 min-h-0">
-          {sidebarOpen && (
-            <div className="flex items-center justify-between px-2 py-1 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
-              <span>Saved Sessions</span>
-              <span>{sessionsList.length}</span>
-            </div>
-          )}
+          <div className="flex items-center justify-between px-2 py-1 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+            <span>Saved Sessions</span>
+            <span>{sessionsList.length}</span>
+          </div>
 
           {sessionsList.map((sess) => {
             const badge = getAgentBadgeIcon(sess.agent_used || sess.agent_type);
@@ -499,7 +483,7 @@ export default function App() {
                 key={sess.session_id}
                 onClick={() => handleSelectSession(sess)}
                 title={sess.title}
-                className={`w-full text-left p-2.5 rounded-xl transition-all border group flex items-center justify-between cursor-pointer ${
+                className={`w-full text-left p-3 rounded-xl transition-all border group flex items-center justify-between cursor-pointer ${
                   isSelected
                     ? 'bg-indigo-600/15 border-indigo-500/40 shadow-inner'
                     : 'bg-slate-950/40 hover:bg-slate-800/60 border-slate-800/80'
@@ -507,11 +491,9 @@ export default function App() {
               >
                 <div className="flex items-center space-x-2.5 truncate min-w-0">
                   <span className="text-sm shrink-0">{badge.emoji}</span>
-                  {sidebarOpen && (
-                    <span className={`text-xs font-semibold truncate ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
-                      {sess.title}
-                    </span>
-                  )}
+                  <span className={`text-xs font-semibold truncate ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
+                    {sess.title}
+                  </span>
                 </div>
               </button>
             );
@@ -523,10 +505,10 @@ export default function App() {
           <button
             onClick={handleResetVectorStore}
             title="Clear Vector Store"
-            className="w-full flex items-center space-x-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 p-2 rounded-xl text-xs font-medium transition-colors justify-center cursor-pointer overflow-hidden"
+            className="w-full flex items-center space-x-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 p-2 rounded-xl text-xs font-medium transition-colors justify-center cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5 shrink-0" />
-            {sidebarOpen && <span className="truncate">Clear Vector Store</span>}
+            <span>Clear Vector Store</span>
           </button>
         </div>
       </aside>
