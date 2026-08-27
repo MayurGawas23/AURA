@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User, AlertTriangle, Menu } from 'lucide-react';
+import { Bot, Search, FileText, Code, BarChart2, Eye, Sparkles, Send, Paperclip, Loader2, CheckCircle2, Wrench, GitCommit, Copy, Check, Upload, X, History, Plus, MessageSquare, TrendingUp, Table, Activity, BarChart, FileCode, Trash2, Cpu, ArrowUpRight, User, AlertTriangle, Menu, Sun, Moon } from 'lucide-react';
 
 const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const API_BASE_URL = rawApiUrl.replace(/\/$/, '');
@@ -61,8 +61,8 @@ const CodeBlock = ({ children }) => {
   );
 };
 
-// Dual-Engine Interactive Visual Chart & Graph Renderer (Minimal Light Mode)
-const DataChartRenderer = ({ text }) => {
+// Dual-Engine Interactive Visual Chart & Graph Renderer (Dual Light/Dark Adaptive)
+const DataChartRenderer = ({ text, isDark }) => {
   if (!text) return null;
   let chartData = null;
 
@@ -118,35 +118,35 @@ const DataChartRenderer = ({ text }) => {
   const maxItem = chartData.data.reduce((prev, current) => (Number(current.value) > Number(prev.value) ? current : prev), chartData.data[0]);
 
   return (
-    <div className="my-6 bg-white border border-zinc-200/90 rounded-2xl p-6 shadow-sm space-y-6">
-      <div className="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+    <div className={`my-6 border rounded-2xl p-6 shadow-sm space-y-6 ${isDark ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-zinc-200/90'}`}>
+      <div className={`flex items-center justify-between border-b pb-3.5 ${isDark ? 'border-zinc-800' : 'border-zinc-100'}`}>
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-indigo-50 border border-indigo-100 rounded-xl">
-            <BarChart className="w-5 h-5 text-indigo-600" />
+          <div className={`p-2 border rounded-xl ${isDark ? 'bg-indigo-600/20 border-indigo-500/30' : 'bg-indigo-50 border-indigo-100'}`}>
+            <BarChart className={`w-5 h-5 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
           </div>
           <div>
-            <h3 className="text-base font-bold font-heading text-zinc-900">{chartData.title || 'Interactive Data Visualization'}</h3>
-            <p className="text-xs text-zinc-500">{chartData.x_label || 'Category'} vs {chartData.y_label || 'Value'}</p>
+            <h3 className={`text-base font-bold font-heading ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>{chartData.title || 'Interactive Data Visualization'}</h3>
+            <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{chartData.x_label || 'Category'} vs {chartData.y_label || 'Value'}</p>
           </div>
         </div>
-        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center space-x-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+        <span className={`px-3 py-1 border rounded-full text-xs font-semibold uppercase tracking-wider flex items-center space-x-1.5 ${isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'}`}>
+          <Sparkles className="w-3.5 h-3.5" />
           <span>Interactive Visual Graph</span>
         </span>
       </div>
 
       <div className="grid grid-cols-3 gap-3.5">
-        <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-3.5">
-          <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Highest Peak</p>
-          <p className="text-sm font-bold font-heading text-emerald-600 truncate mt-0.5">{maxItem?.label}: {maxItem?.value}</p>
+        <div className={`border rounded-xl p-3.5 ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200/60'}`}>
+          <p className={`text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>Highest Peak</p>
+          <p className="text-sm font-bold font-heading text-emerald-500 truncate mt-0.5">{maxItem?.label}: {maxItem?.value}</p>
         </div>
-        <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-3.5">
-          <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Mean Average</p>
-          <p className="text-sm font-bold font-heading text-indigo-600 mt-0.5">{avgValue}</p>
+        <div className={`border rounded-xl p-3.5 ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200/60'}`}>
+          <p className={`text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>Mean Average</p>
+          <p className={`text-sm font-bold font-heading mt-0.5 ${isDark ? 'text-cyan-400' : 'text-indigo-600'}`}>{avgValue}</p>
         </div>
-        <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-3.5">
-          <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Categories</p>
-          <p className="text-sm font-bold font-heading text-zinc-900 mt-0.5">{chartData.data.length} Visualized</p>
+        <div className={`border rounded-xl p-3.5 ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200/60'}`}>
+          <p className={`text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>Categories</p>
+          <p className={`text-sm font-bold font-heading mt-0.5 ${isDark ? 'text-indigo-400' : 'text-zinc-900'}`}>{chartData.data.length} Visualized</p>
         </div>
       </div>
 
@@ -158,10 +158,10 @@ const DataChartRenderer = ({ text }) => {
           return (
             <div key={idx} className="space-y-1.5">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-zinc-700 capitalize font-medium truncate max-w-sm">{item.label}</span>
-                <span className="text-indigo-600 font-mono font-bold">{val}</span>
+                <span className={`capitalize font-medium truncate max-w-sm ${isDark ? 'text-zinc-200' : 'text-zinc-700'}`}>{item.label}</span>
+                <span className={`font-mono font-bold ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>{val}</span>
               </div>
-              <div className="w-full bg-zinc-100 h-3.5 rounded-full overflow-hidden border border-zinc-200/60 p-0.5">
+              <div className={`w-full h-3.5 rounded-full overflow-hidden border p-0.5 ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-100 border-zinc-200/60'}`}>
                 <div
                   className="bg-gradient-to-r from-indigo-500 via-indigo-600 to-emerald-500 h-full rounded-full transition-all duration-700 shadow-2xs"
                   style={{ width: `${pct}%` }}
@@ -184,6 +184,20 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [currentWorkingAgent, setCurrentWorkingAgent] = useState('');
   const [systemStatus, setSystemStatus] = useState(null);
+
+  // Theme State (Default light, persists to localStorage)
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('aura_theme') || 'light';
+    }
+    return 'light';
+  });
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('aura_theme', nextTheme);
+  };
   
   // Conversational Chat Messages State
   const [messages, setMessages] = useState([]);
@@ -431,25 +445,28 @@ export default function App() {
   ];
 
   const isLandingPage = messages.length === 0 && !loading;
+  const isDark = theme === 'dark';
 
   return (
-    <div className="h-screen overflow-hidden bg-zinc-50/70 text-zinc-900 flex font-sans relative">
+    <div className={`h-screen overflow-hidden flex font-sans relative transition-colors duration-200 ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-zinc-50/70 text-zinc-900'}`}>
       {/* Mobile Backdrop Overlay */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs z-40 md:hidden transition-opacity"
+          className={`fixed inset-0 z-40 md:hidden transition-opacity ${isDark ? 'bg-black/60 backdrop-blur-xs' : 'bg-zinc-900/40 backdrop-blur-xs'}`}
         />
       )}
 
-      {/* Minimal Off-White Desktop Sidebar (w-80) / Mobile Drawer */}
+      {/* Adaptive Responsive Sidebar (w-80) */}
       <aside
         className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } fixed md:relative inset-y-0 left-0 z-50 w-72 sm:w-80 h-full border-r border-zinc-200/80 bg-white/95 backdrop-blur-md transition-transform duration-300 flex flex-col shrink-0 overflow-hidden shadow-xl md:shadow-none`}
+        } fixed md:relative inset-y-0 left-0 z-50 w-72 sm:w-80 h-full border-r backdrop-blur-md transition-all duration-300 flex flex-col shrink-0 overflow-hidden shadow-xl md:shadow-none ${
+          isDark ? 'bg-zinc-900/95 border-zinc-800 text-zinc-100' : 'bg-white/95 border-zinc-200/80 text-zinc-900'
+        }`}
       >
         {/* Sidebar Top Action Bar */}
-        <div className="p-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
+        <div className={`p-4 border-b flex items-center justify-between shrink-0 ${isDark ? 'border-zinc-800' : 'border-zinc-100'}`}>
           <button
             onClick={handleNewChat}
             className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white px-4 py-2.5 rounded-xl text-xs font-semibold font-heading transition-all duration-200 w-full justify-center shadow-xs hover:shadow-md cursor-pointer"
@@ -461,7 +478,7 @@ export default function App() {
           {/* Close Icon on Mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-2 text-zinc-400 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors ml-2 cursor-pointer shrink-0"
+            className={`md:hidden p-2 rounded-lg transition-colors ml-2 cursor-pointer shrink-0 ${isDark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800' : 'text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100'}`}
             title="Close Drawer"
           >
             <X className="w-4.5 h-4.5" />
@@ -470,9 +487,9 @@ export default function App() {
 
         {/* Saved Sessions Scroll Area */}
         <div className="flex-1 overflow-y-auto p-3 space-y-1 min-h-0">
-          <div className="flex items-center justify-between px-2 py-1.5 text-[11px] uppercase tracking-wider text-zinc-400 font-bold font-heading">
+          <div className={`flex items-center justify-between px-2 py-1.5 text-[11px] uppercase tracking-wider font-bold font-heading ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
             <span>Saved Sessions</span>
-            <span className="px-1.5 py-0.5 bg-zinc-100 rounded-md text-zinc-600 font-mono text-[10px]">{sessionsList.length}</span>
+            <span className={`px-1.5 py-0.5 rounded-md font-mono text-[10px] ${isDark ? 'bg-zinc-800 text-zinc-300' : 'bg-zinc-100 text-zinc-600'}`}>{sessionsList.length}</span>
           </div>
 
           {sessionsList.map((sess) => {
@@ -486,13 +503,17 @@ export default function App() {
                 title={sess.title}
                 className={`w-full text-left p-2.5 rounded-xl transition-all duration-150 group flex items-center justify-between cursor-pointer border ${
                   isSelected
-                    ? 'bg-indigo-50/80 border-indigo-200/90 text-indigo-950 font-semibold shadow-2xs'
-                    : 'bg-transparent hover:bg-zinc-100/70 border-transparent text-zinc-700 hover:text-zinc-900'
+                    ? isDark
+                      ? 'bg-indigo-950/60 border-indigo-500/40 text-indigo-200 font-semibold'
+                      : 'bg-indigo-50/80 border-indigo-200/90 text-indigo-950 font-semibold shadow-2xs'
+                    : isDark
+                      ? 'bg-transparent hover:bg-zinc-800/60 border-transparent text-zinc-300 hover:text-white'
+                      : 'bg-transparent hover:bg-zinc-100/70 border-transparent text-zinc-700 hover:text-zinc-900'
                 }`}
               >
                 <div className="flex items-center space-x-2.5 truncate min-w-0">
                   <span className="text-sm shrink-0">{badge.emoji}</span>
-                  <span className={`text-xs truncate ${isSelected ? 'font-semibold text-indigo-950' : 'font-medium text-zinc-700 group-hover:text-zinc-900'}`}>
+                  <span className={`text-xs truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
                     {sess.title}
                   </span>
                 </div>
@@ -502,11 +523,15 @@ export default function App() {
         </div>
 
         {/* Maintenance Action Footer */}
-        <div className="p-3 border-t border-zinc-100 shrink-0">
+        <div className={`p-3 border-t shrink-0 ${isDark ? 'border-zinc-800' : 'border-zinc-100'}`}>
           <button
             onClick={handleResetVectorStore}
             title="Clear Vector Store"
-            className="w-full flex items-center space-x-2 bg-rose-50/60 hover:bg-rose-100/70 border border-rose-200/80 text-rose-700 p-2.5 rounded-xl text-xs font-medium transition-colors justify-center cursor-pointer"
+            className={`w-full flex items-center space-x-2 p-2.5 rounded-xl text-xs font-medium transition-colors justify-center cursor-pointer border ${
+              isDark
+                ? 'bg-rose-950/40 hover:bg-rose-900/50 border-rose-800/60 text-rose-300'
+                : 'bg-rose-50/60 hover:bg-rose-100/70 border-rose-200/80 text-rose-700'
+            }`}
           >
             <Trash2 className="w-3.5 h-3.5 shrink-0" />
             <span>Clear Vector Store</span>
@@ -517,15 +542,15 @@ export default function App() {
       {/* Main Content Workspace */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Streamlined Clean Header */}
-        <header className="border-b border-zinc-200/80 bg-white/80 backdrop-blur-md px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0">
+        <header className={`border-b backdrop-blur-md px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0 ${isDark ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white/80 border-zinc-200/80'}`}>
           <div className="flex items-center space-x-3">
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 bg-zinc-100 border border-zinc-200 hover:bg-zinc-200/70 rounded-xl text-zinc-700 transition-colors cursor-pointer shrink-0"
+              className={`md:hidden p-2 border rounded-xl transition-colors cursor-pointer shrink-0 ${isDark ? 'bg-zinc-800 border-zinc-700 text-zinc-200 hover:bg-zinc-700' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-zinc-200/70'}`}
               title="Toggle Sidebar Menu"
             >
-              <Menu className="w-5 h-5 text-indigo-600" />
+              <Menu className="w-5 h-5 text-indigo-500" />
             </button>
 
             <div className="p-2 bg-indigo-600 rounded-xl shadow-xs shrink-0">
@@ -533,54 +558,79 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-lg sm:text-xl font-extrabold font-heading text-zinc-900 tracking-tight">
+                <h1 className={`text-lg sm:text-xl font-extrabold font-heading tracking-tight ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>
                   AURA
                 </h1>
                 {systemStatus && (
-                  <span className="flex items-center space-x-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full text-[10px] font-mono font-medium">
+                  <span className={`flex items-center space-x-1 px-2 py-0.5 border rounded-full text-[10px] font-mono font-medium ${isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'}`}>
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span>ONLINE</span>
                   </span>
                 )}
               </div>
-              <p className="text-[11px] sm:text-xs text-zinc-500 truncate max-w-[200px] sm:max-w-none font-medium">
+              <p className={`text-[11px] sm:text-xs truncate max-w-[180px] sm:max-w-none font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
                 Autonomous Unified Research Assistant
               </p>
             </div>
           </div>
 
-          {/* Diagnostic Stats Badge */}
-          {systemStatus && (
-            <div className="hidden lg:flex items-center space-x-3.5 text-xs font-mono bg-zinc-100/80 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
-              <div className="flex items-center space-x-1.5 text-zinc-700">
-                <Cpu className="w-3.5 h-3.5 text-indigo-600" />
-                <span>ChromaDB: <strong className="text-emerald-700 font-semibold">{systemStatus.chroma_db_active ? 'ACTIVE' : 'EMPTY'}</strong></span>
+          <div className="flex items-center space-x-3">
+            {/* Theme Toggle Button (Light Off-White vs Dark Zinc) */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-center space-x-1.5 ${
+                isDark
+                  ? 'bg-zinc-800/90 border-zinc-700 text-amber-400 hover:text-amber-300 hover:bg-zinc-700'
+                  : 'bg-zinc-100 border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/80'
+              }`}
+              title={`Switch to ${isDark ? 'Light' : 'Dark'} Theme`}
+            >
+              {isDark ? (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400" />
+                  <span className="hidden sm:inline text-xs font-semibold text-zinc-200">Light</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-zinc-700" />
+                  <span className="hidden sm:inline text-xs font-semibold text-zinc-700">Dark</span>
+                </>
+              )}
+            </button>
+
+            {/* Diagnostic Stats Badge */}
+            {systemStatus && (
+              <div className={`hidden lg:flex items-center space-x-3.5 text-xs font-mono border px-3 py-1.5 rounded-xl ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-100/80 border-zinc-200/80'}`}>
+                <div className={`flex items-center space-x-1.5 ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  <Cpu className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>ChromaDB: <strong className="text-emerald-500 font-semibold">{systemStatus.chroma_db_active ? 'ACTIVE' : 'EMPTY'}</strong></span>
+                </div>
+                <div className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>|</div>
+                <div className={isDark ? 'text-zinc-300' : 'text-zinc-700'}>
+                  Uploaded: <strong className="text-indigo-400 font-semibold">{systemStatus.total_files_uploaded ?? 0} Files</strong>
+                </div>
+                <div className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>|</div>
+                <div className={isDark ? 'text-zinc-300' : 'text-zinc-700'}>
+                  Sessions: <strong className={`font-semibold ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>{systemStatus.total_chat_sessions ?? 0} Saved</strong>
+                </div>
               </div>
-              <div className="text-zinc-300">|</div>
-              <div className="text-zinc-700">
-                Uploaded: <strong className="text-indigo-600 font-semibold">{systemStatus.total_files_uploaded ?? 0} Files</strong>
-              </div>
-              <div className="text-zinc-300">|</div>
-              <div className="text-zinc-700">
-                Sessions: <strong className="text-zinc-900 font-semibold">{systemStatus.total_chat_sessions ?? 0} Saved</strong>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </header>
 
         {/* Workspace Body */}
         <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col min-h-0 overflow-hidden">
           {isLandingPage ? (
-            /* Minimal Human Warm Landing Window */
+            /* Minimal Human Landing Window */
             <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full mx-auto space-y-8 animate-fade-in">
               <div className="text-center space-y-2">
-                <div className="inline-flex p-3 bg-indigo-50 border border-indigo-100 rounded-2xl mb-1 shadow-2xs">
-                  <Bot className="w-8 h-8 sm:w-10 sm:h-10 text-indigo-600" />
+                <div className={`inline-flex p-3 border rounded-2xl mb-1 shadow-2xs ${isDark ? 'bg-indigo-600/20 border-indigo-500/30' : 'bg-indigo-50 border-indigo-100'}`}>
+                  <Bot className={`w-8 h-8 sm:w-10 sm:h-10 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight font-heading">
+                <h2 className={`text-3xl sm:text-4xl font-extrabold tracking-tight font-heading ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>
                   What can I help you with today?
                 </h2>
-                <p className="text-sm text-zinc-500 font-serif-greeting italic text-lg pt-1">
+                <p className={`text-sm font-serif-greeting italic text-lg pt-1 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
                   Select a research model or ask anything below
                 </p>
               </div>
@@ -594,19 +644,27 @@ export default function App() {
                   onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
                 />
 
-                <div className="relative flex items-center bg-white border border-zinc-200/90 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 rounded-2xl shadow-sm transition-all duration-200 p-2 space-x-2">
+                <div className={`relative flex items-center border rounded-2xl shadow-sm transition-all duration-200 p-2 space-x-2 ${
+                  isDark
+                    ? 'bg-zinc-900/90 border-zinc-800 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/20'
+                    : 'bg-white border-zinc-200/90 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10'
+                }`}>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     title="Attach File (PDF, DOCX, CSV, Image)"
-                    className="p-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600 hover:text-zinc-900 transition-colors cursor-pointer shrink-0"
+                    className={`p-2.5 rounded-xl transition-colors cursor-pointer shrink-0 ${
+                      isDark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600 hover:text-zinc-900'
+                    }`}
                   >
-                    <Plus className="w-4 h-4 text-indigo-600" />
+                    <Plus className={`w-4 h-4 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
                   </button>
 
                   {uploadedFileName && (
-                    <div className="flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1.5 rounded-xl text-emerald-800 font-mono text-xs shrink-0">
-                      <Paperclip className="w-3.5 h-3.5 text-emerald-600" />
+                    <div className={`flex items-center space-x-1.5 border px-2.5 py-1.5 rounded-xl font-mono text-xs shrink-0 ${
+                      isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200/80 text-emerald-800'
+                    }`}>
+                      <Paperclip className="w-3.5 h-3.5" />
                       <span className="truncate max-w-[100px] sm:max-w-[120px] font-medium">{getFileName(uploadedFileName)}</span>
                       <button
                         type="button"
@@ -614,7 +672,7 @@ export default function App() {
                           setUploadedFileName('');
                           setFilePath('');
                         }}
-                        className="hover:text-rose-600 cursor-pointer ml-1"
+                        className="hover:text-rose-500 cursor-pointer ml-1"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -626,7 +684,7 @@ export default function App() {
                     placeholder={uploading ? "Uploading file to storage..." : `Ask AURA anything...`}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1 bg-transparent px-2 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none"
+                    className={`flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none ${isDark ? 'text-zinc-100 placeholder-zinc-500' : 'text-zinc-900 placeholder-zinc-400'}`}
                   />
 
                   <button
@@ -638,8 +696,10 @@ export default function App() {
                   </button>
                 </div>
                 {['rag', 'data', 'vision'].includes(activeTab) && (
-                  <p className="text-xs text-amber-700 mt-2.5 flex items-center space-x-1.5 font-medium px-2 bg-amber-50 border border-amber-200/60 p-2 rounded-xl">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <p className={`text-xs mt-2.5 flex items-center space-x-1.5 font-medium px-2 border p-2 rounded-xl ${
+                    isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200/60 text-amber-700'
+                  }`}>
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                     <span><strong>Mandatory Attachment</strong>: You must attach a file to start a session in [{getAgentLabel(activeTab)}].</span>
                   </p>
                 )}
@@ -657,19 +717,31 @@ export default function App() {
                       onClick={() => handleSelectToolTile(tile.mode, tile.promptText)}
                       className={`p-4 rounded-2xl text-left transition-all duration-200 group flex flex-col justify-between border cursor-pointer ${
                         isSelected
-                          ? 'bg-indigo-50/70 border-indigo-300 shadow-sm scale-[1.01]'
-                          : 'bg-white hover:bg-zinc-50 border-zinc-200/80 hover:border-indigo-300/80 hover:-translate-y-0.5 hover:shadow-md'
+                          ? isDark
+                            ? 'bg-indigo-950/60 border-indigo-500/60 shadow-sm scale-[1.01]'
+                            : 'bg-indigo-50/70 border-indigo-300 shadow-sm scale-[1.01]'
+                          : isDark
+                            ? 'bg-zinc-900/60 hover:bg-zinc-800/70 border-zinc-800/90 hover:border-indigo-500/40 hover:-translate-y-0.5 hover:shadow-md'
+                            : 'bg-white hover:bg-zinc-50 border-zinc-200/80 hover:border-indigo-300/80 hover:-translate-y-0.5 hover:shadow-md'
                       }`}
                     >
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <div className={`flex items-center space-x-2 text-xs font-bold font-heading ${isSelected ? 'text-indigo-900' : 'text-zinc-800 group-hover:text-indigo-600'}`}>
-                            <TileIcon className="w-4 h-4 text-indigo-600 shrink-0" />
+                          <div className={`flex items-center space-x-2 text-xs font-bold font-heading ${
+                            isSelected
+                              ? isDark ? 'text-indigo-300' : 'text-indigo-900'
+                              : isDark ? 'text-zinc-200 group-hover:text-indigo-400' : 'text-zinc-800 group-hover:text-indigo-600'
+                          }`}>
+                            <TileIcon className={`w-4 h-4 shrink-0 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
                             <span className="truncate">{tile.label}</span>
                           </div>
-                          <ArrowUpRight className={`w-3.5 h-3.5 shrink-0 transition-colors ${isSelected ? 'text-indigo-600' : 'text-zinc-400 group-hover:text-indigo-600'}`} />
+                          <ArrowUpRight className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                            isSelected
+                              ? isDark ? 'text-indigo-400' : 'text-indigo-600'
+                              : isDark ? 'text-zinc-500 group-hover:text-indigo-400' : 'text-zinc-400 group-hover:text-indigo-600'
+                          }`} />
                         </div>
-                        <p className="text-xs text-zinc-500 leading-snug line-clamp-2">{tile.text}</p>
+                        <p className={`text-xs leading-snug line-clamp-2 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{tile.text}</p>
                       </div>
                     </button>
                   );
@@ -685,17 +757,21 @@ export default function App() {
                     {msg.role === 'user' ? (
                       /* User Message Bubble */
                       <div className="flex justify-end items-start space-x-2.5 sm:space-x-3">
-                        <div className="bg-zinc-900 text-white rounded-2xl rounded-tr-xs px-4 sm:px-5 py-3 max-w-[85%] sm:max-w-xl shadow-xs text-xs sm:text-sm font-sans leading-relaxed">
+                        <div className={`rounded-2xl rounded-tr-xs px-4 sm:px-5 py-3 max-w-[85%] sm:max-w-xl shadow-xs text-xs sm:text-sm font-sans leading-relaxed ${
+                          isDark ? 'bg-indigo-600 text-white' : 'bg-zinc-900 text-white'
+                        }`}>
                           <p>{msg.content || msg.text}</p>
                           {msg.file_path && (
-                            <div className="mt-2 text-[11px] bg-zinc-800 px-2.5 py-1 rounded-lg flex items-center space-x-1.5 font-mono text-zinc-300">
-                              <Paperclip className="w-3 h-3 text-indigo-400" />
+                            <div className={`mt-2 text-[11px] px-2.5 py-1 rounded-lg flex items-center space-x-1.5 font-mono ${
+                              isDark ? 'bg-indigo-700/60 text-indigo-200' : 'bg-zinc-800 text-zinc-300'
+                            }`}>
+                              <Paperclip className="w-3 h-3" />
                               <span className="truncate">{getFileName(msg.file_path)}</span>
                             </div>
                           )}
                         </div>
-                        <div className="p-1.5 sm:p-2 bg-zinc-200 border border-zinc-300/80 rounded-xl shrink-0">
-                          <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-zinc-700" />
+                        <div className={`p-1.5 sm:p-2 border rounded-xl shrink-0 ${isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-200 border-zinc-300/80'}`}>
+                          <User className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`} />
                         </div>
                       </div>
                     ) : (
@@ -704,26 +780,30 @@ export default function App() {
                         <div className="p-2 bg-indigo-600 rounded-xl shadow-xs shrink-0">
                           <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <div className="flex-1 max-w-3xl bg-white border border-zinc-200/90 rounded-2xl rounded-tl-xs p-5 sm:p-6 space-y-5 shadow-xs min-w-0">
+                        <div className={`flex-1 max-w-3xl border rounded-2xl rounded-tl-xs p-5 sm:p-6 space-y-5 shadow-xs min-w-0 ${
+                          isDark ? 'bg-zinc-900/90 border-zinc-800 text-zinc-100' : 'bg-white border-zinc-200/90 text-zinc-800'
+                        }`}>
                           {/* Execution Plan Banner */}
                           {msg.execution_plan && msg.agent_type !== 'chat' && (
-                            <div className="bg-zinc-50 border border-zinc-200/80 rounded-xl p-3.5 space-y-2.5 shadow-2xs">
-                              <div className="flex items-center justify-between border-b border-zinc-200/60 pb-2">
-                                <div className="flex items-center space-x-2 text-xs font-bold font-heading text-indigo-900 uppercase tracking-wider">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <div className={`border rounded-xl p-3.5 space-y-2.5 shadow-2xs ${isDark ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200/80'}`}>
+                              <div className={`flex items-center justify-between border-b pb-2 ${isDark ? 'border-zinc-800' : 'border-zinc-200/60'}`}>
+                                <div className={`flex items-center space-x-2 text-xs font-bold font-heading uppercase tracking-wider ${isDark ? 'text-indigo-400' : 'text-indigo-900'}`}>
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                                   <span className="truncate">Execution Plan — {msg.execution_plan.agent_name}</span>
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                                 <div className="space-y-1">
-                                  <span className="text-zinc-500 flex items-center space-x-1 font-medium">
-                                    <Wrench className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span className={`flex items-center space-x-1 font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                    <Wrench className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                                     <span>Tools Activated:</span>
                                   </span>
                                   <div className="flex flex-wrap gap-1.5 pt-1">
                                     {msg.execution_plan.tools.map((t, i) => (
-                                      <span key={i} className="px-2 py-0.5 bg-white border border-zinc-200 rounded text-indigo-900 font-mono text-[11px] shadow-2xs">
+                                      <span key={i} className={`px-2 py-0.5 border rounded font-mono text-[11px] ${
+                                        isDark ? 'bg-zinc-900 border-zinc-800 text-indigo-300' : 'bg-white border-zinc-200 text-indigo-900'
+                                      }`}>
                                         • {t}
                                       </span>
                                     ))}
@@ -731,11 +811,11 @@ export default function App() {
                                 </div>
 
                                 <div className="space-y-1">
-                                  <span className="text-zinc-500 flex items-center space-x-1 font-medium">
-                                    <GitCommit className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span className={`flex items-center space-x-1 font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                    <GitCommit className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                                     <span>Pipeline Flow:</span>
                                   </span>
-                                  <div className="text-zinc-800 font-mono pt-1 text-[11px] overflow-x-auto font-medium">
+                                  <div className={`font-mono pt-1 text-[11px] overflow-x-auto font-medium ${isDark ? 'text-zinc-200' : 'text-zinc-800'}`}>
                                     {msg.execution_plan.pipeline_steps.join('  ➔  ')}
                                   </div>
                                 </div>
@@ -744,10 +824,12 @@ export default function App() {
                           )}
 
                           {/* Visual Graph Renderer */}
-                          <DataChartRenderer text={msg.content} />
+                          <DataChartRenderer text={msg.content} isDark={isDark} />
 
                           {/* Formatted Markdown Body */}
-                          <div className="prose prose-zinc max-w-none text-zinc-800 text-xs sm:text-sm leading-relaxed overflow-x-auto font-sans">
+                          <div className={`prose max-w-none text-xs sm:text-sm leading-relaxed overflow-x-auto font-sans ${
+                            isDark ? 'prose-invert prose-zinc text-zinc-200' : 'prose-zinc text-zinc-800'
+                          }`}>
                             <ReactMarkdown
                               components={{
                                 code({ node, inline, className, children, ...props }) {
@@ -755,7 +837,9 @@ export default function App() {
                                   const isInline = inline || (!match && !String(children).includes('\n'));
                                   if (isInline) {
                                     return (
-                                      <code className="bg-zinc-100 text-indigo-900 px-1.5 py-0.5 rounded font-mono text-[11px] border border-zinc-200" {...props}>
+                                      <code className={`px-1.5 py-0.5 rounded font-mono text-[11px] border ${
+                                        isDark ? 'bg-zinc-950 text-indigo-300 border-zinc-800' : 'bg-zinc-100 text-indigo-900 border-zinc-200'
+                                      }`} {...props}>
                                         {children}
                                       </code>
                                     );
@@ -779,13 +863,15 @@ export default function App() {
                     <div className="p-2 bg-indigo-600 rounded-xl shadow-xs shrink-0">
                       <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
-                    <div className="bg-white border border-indigo-200 rounded-2xl rounded-tl-xs p-4 flex items-center space-x-3 shadow-xs">
-                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-indigo-600 shrink-0" />
+                    <div className={`border rounded-2xl rounded-tl-xs p-4 flex items-center space-x-3 shadow-xs ${
+                      isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-indigo-200'
+                    }`}>
+                      <Loader2 className={`w-4 h-4 sm:w-5 sm:h-5 animate-spin shrink-0 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
                       <div className="space-y-0.5">
-                        <p className="text-xs font-bold font-heading text-indigo-900 animate-pulse">
+                        <p className={`text-xs font-bold font-heading animate-pulse ${isDark ? 'text-indigo-300' : 'text-indigo-900'}`}>
                           {currentWorkingAgent} is reasoning...
                         </p>
-                        <p className="text-[11px] text-zinc-500">Executing tools and processing response data</p>
+                        <p className={`text-[11px] ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>Executing tools and processing response data</p>
                       </div>
                     </div>
                   </div>
@@ -803,19 +889,27 @@ export default function App() {
                   onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
                 />
 
-                <div className="relative flex items-center bg-white border border-zinc-200/90 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 rounded-2xl shadow-sm transition-all duration-200 p-1.5 space-x-2">
+                <div className={`relative flex items-center border rounded-2xl shadow-sm transition-all duration-200 p-1.5 space-x-2 ${
+                  isDark
+                    ? 'bg-zinc-900/90 border-zinc-800 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/20'
+                    : 'bg-white border-zinc-200/90 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10'
+                }`}>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     title="Attach File (PDF, DOCX, CSV, Image)"
-                    className="p-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600 hover:text-zinc-900 transition-colors cursor-pointer shrink-0"
+                    className={`p-2.5 rounded-xl transition-colors cursor-pointer shrink-0 ${
+                      isDark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600 hover:text-zinc-900'
+                    }`}
                   >
-                    <Plus className="w-4.5 h-4.5 text-indigo-600" />
+                    <Plus className={`w-4.5 h-4.5 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
                   </button>
 
                   {uploadedFileName && (
-                    <div className="flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1.5 rounded-xl text-emerald-800 font-mono text-xs shrink-0">
-                      <Paperclip className="w-3.5 h-3.5 text-emerald-600" />
+                    <div className={`flex items-center space-x-1.5 border px-2.5 py-1.5 rounded-xl font-mono text-xs shrink-0 ${
+                      isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200/80 text-emerald-800'
+                    }`}>
+                      <Paperclip className="w-3.5 h-3.5" />
                       <span className="truncate max-w-[90px] sm:max-w-[120px] font-medium">{getFileName(uploadedFileName)}</span>
                       <button
                         type="button"
@@ -823,7 +917,7 @@ export default function App() {
                           setUploadedFileName('');
                           setFilePath('');
                         }}
-                        className="hover:text-rose-600 cursor-pointer ml-1"
+                        className="hover:text-rose-500 cursor-pointer ml-1"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -835,7 +929,7 @@ export default function App() {
                     placeholder={uploading ? "Uploading file to storage..." : `Type your prompt for ${getAgentLabel(activeTab)}...`}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1 bg-transparent px-2 py-2 text-xs sm:text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none"
+                    className={`flex-1 bg-transparent px-2 py-2 text-xs sm:text-sm focus:outline-none ${isDark ? 'text-zinc-100 placeholder-zinc-500' : 'text-zinc-900 placeholder-zinc-400'}`}
                   />
 
                   <button
@@ -848,8 +942,8 @@ export default function App() {
                   </button>
                 </div>
                 {['rag', 'data', 'vision'].includes(activeTab) && (
-                  <p className="text-[11px] text-amber-700 mt-1.5 flex items-center space-x-1.5 font-medium px-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <p className={`text-[11px] mt-1.5 flex items-center space-x-1.5 font-medium px-2 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                     <span><strong>Mandatory Attachment</strong>: File required to start session. Subsequent queries in this session reuse your file.</span>
                   </p>
                 )}
